@@ -1,5 +1,8 @@
 .\HSLUDriveConfig.ps1
-
+<#
+.\Dismount-Drives.ps1
+.\Mount-Drives.ps1
+#>
 $Syncs | ForEach-Object{
 
     Write-Host "`nRun sync for: $($_.Name)"
@@ -47,7 +50,7 @@ $Syncs | ForEach-Object{
     }else{
 
          Compare-Object $DestinationDirectories $SourceDirectories -Property "RelativePath" | where{$_.SideIndicator -eq "=>"} | ForEach-Object{
-    
+
             $NewDirectories += Join-Path $DestinationPath $_.RelativePath
         }
     }
@@ -65,7 +68,7 @@ $Syncs | ForEach-Object{
 
     $NewFiles = @()
     $SyncDirectories | where{$_ -ne $null} | ForEach-Object{
-        
+
         # get files
 
         $SourceDirectory = Join-Path $SourcePath $_
@@ -73,7 +76,7 @@ $Syncs | ForEach-Object{
 
         $SourceFiles = Get-ChildItem $SourceDirectory -File | select @{L="RelativeFilePath";E={$_.FullName -replace [regex]::Escape($SourcePath),""}},LastWriteTime
         $DestinationFiles = Get-ChildItem $DestinationDirectory -File -ErrorAction Continue | select @{L="RelativeFilePath";E={$_.FullName -replace [regex]::Escape($DestinationPath),""}},LastWriteTime
-        
+
         # sync files
 
         if($SourceFiles -eq $null){
@@ -106,7 +109,7 @@ $Syncs | ForEach-Object{
 
                         # create new file path
                         $TempDestinationFilePath = Join-Path (Split-Path $DestinationFile -Parent) $($SourceFile.Name + "#" + $((Get-date $SourceFile.LastWriteTime -Format s) -replace ":","-") + $SourceFile.Extension)
-                    
+
                         # output copy job if destination file not already exists
                         if(-not (Test-Path $TempDestinationFilePath)){
 
@@ -114,9 +117,9 @@ $Syncs | ForEach-Object{
                                 Source = $SourceFile.FullName
                                 Destination = $TempDestinationFilePath
                             }
-                        }                    
+                        }
                     }else{
-                        
+
                         # do not copy as my files are newer
                     }
 
@@ -126,6 +129,21 @@ $Syncs | ForEach-Object{
                         Destination = $(if($DestinationFile.GetType().Name -eq "String"){$DestinationFile}else{$DestinationFile.FullName})
                     }
                 }
+            }
+
+            # Add file containing list of files only existing in the local drive
+
+            $LocalFiles = @()
+            $LocalFiles += Compare-Object $DestinationFiles $SourceFiles -Property "RelativeFilePath" | where{$_.SideIndicator -eq "<="} | ForEach-Object{
+                (Get-ChildItem (Join-Path -Path $DestinationPath -ChildPath $_.RelativeFilePath)).Name
+            }
+            $LocalFilePath = (Join-Path $DestinationDirectory "LocalFiles.md")
+            if($LocalFiles -ne $null){
+                Write-Host "Update: $LocalFilePath"
+                Set-Content -Path $LocalFilePath -Value ($LocalFiles | ForEach-Object{"* $_"})
+            }elseif(($LocalFiles -eq $null) -and (Test-Path $LocalFilePath)){
+                Write-Host "Remove: $LocalFilePath"
+                Remove-Item -Path $LocalFilePath
             }
         }
     }
