@@ -1,90 +1,81 @@
 $global:User = ""
 $global:Password = ""
 $global:IliasUrl = "https://elearning.hslu.ch/ilias/webdav.php/hslu/ref_"
-$global:Credential = $(New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $(ConvertTo-SecureString -String $Password -AsPlainText -Force))
+$global:Credential = $(New-Object –TypeName System.Management.Automation.PSCredential –ArgumentList $User, $(ConvertTo-SecureString –String $Password –AsPlainText -Force))
 
 $global:Mounts = @{
-    Name = "English"
-    WebDavID = "2394466"
-	DriveLetter = "E"
-},
-@{
-    Name = "Informationssysteme"
-    WebDavID = "2394472"
-	DriveLetter = "I"
-},
-@{
-    Name = "Programmierung"
-    WebDavID = "2394470"
-	DriveLetter = "P"
-},
-@{
+    Name = "Datenmanagement"
+    WebDavID = "2618825 "
+	DriveLetter = "S"
+},@{
     Name = "Kommunikation"
-    WebDavID = "2394468"
+    WebDavID = "2618801"
 	DriveLetter = "K"
-},
-@{
-    Name = "Rechnungswesen, Betriebswirtschaftslehre, Volkswirtschaftslehere"
-    WebDavID = "2394462"
-	DriveLetter = "V"
-},
-@{
-    Name = "Web"
-    WebDavID = "2394474"
-	DriveLetter = "W"
-},
-@{
-    Name = "Mathematik"
-    WebDavID = "2394464"
-	DriveLetter = "M"		
-} 
+},@{
+    Name = "Volkswirtschaftslehre2"
+    WebDavID = "2618953"
+    DriveLetter = "V"
+},@{
+    Name = "Management1"
+    WebDavID = "2618805"
+    DriveLetter = "M"
+},@{
+    Name = "ERP-Systeme"
+    WebDavID = "2618829"
+    DriveLetter = "E"
+},@{
+    Name = "Wirtschaftsmathematik2"
+    WebDavID = "2618793"
+    DriveLetter = "W"
+},@{
+    Name = "Softwarekomponenten"
+    WebDavID = "2618821"
+    DriveLetter = "J"
+},@{
+    Name = "English"
+    WebDavID = "2618929"
+    DriveLetter = "H"
+}
 
 $global:Syncs = @{
-    Name = "English"
-    SourcePath = "E:\W.WIWSP01_A.H1471\Foren\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\English\"
-},
-@{
-    Name = "Web"
-    SourcePath = "W:\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Web\"
-    Exclude = "W:\W.WITEM12.H1471"
-},
-@{
-    Name = "Rechnungswesen"
-    SourcePath = "V:\FRW\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Rechnungswesen\"
-},
-@{
-    Name = "Mathematik"
-    SourcePath = "M:\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Mathematik\"
-    Exclude = "M:\W.WIMAT01.H1471"
-},
-@{
-    Name = "Volkswirtschaft"
-    SourcePath = "V:\VWL\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Volkswirtschaftslehre\"
-},
-@{
-    Name = "Betriebswirtschaftslehre"
-    SourcePath = "V:\BWL\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Betriebswirtschaftslehre\"
-},
-@{
-    Name = "Programmieren"
-    SourcePath = "P:\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Programmierung\"
-    Exclude = "P:\W.WIINM11.H1471"
-},
-@{
+    Name = "Datenmanagement"
+    SourcePath = "S:\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\Datenmanagement\"
+    Exclude = "S:\W.WIINM22.F1571*"
+},@{
     Name = "Kommunikation"
-    SourcePath = "K:\W.WIDEU01.H1471_1\Dokumente\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Kommunikation\"
-},
-@{
-    Name = "Informationssysteme"
-    SourcePath = "I:\"
-    DestinationPath = "C:\OneDrive\Education\HSLU\Informationssysteme\"
-    Exclude = "I:\W.WITEM11.H1471"
+    SourcePath = "K:\W.WIDEU02.F1571\Dokumente\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\Kommunikation\"
+    Exclude = ""
+},@{
+    Name = "Volkswirtschaftslehre2"
+    SourcePath = "V:\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\Volkswirtschaftslehre2\"
+    Exclude = "V:\Briefkasten", "V:\Dateiaustausch", "V:\Foren"
+},@{
+    Name = "Management1"
+    SourcePath = "M:\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\Management1\"
+    Exclude = "M:\W.WIMGT02.F1571*"
+},@{
+    Name = "ERP-Systeme"
+    SourcePath = "E:\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\ERP-Systeme\"
+    Exclude = "E:\W.WIPRM02.F1571*", "E:\ blau_SemesterProgramm-PRM02-FS15.pdf", "E:\ rosa_stoff_abgr_PRM02-FS15.pdf"
+},@{
+    Name = "Wirtschaftsmathematik2"
+    SourcePath = "W:\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\Wirtschaftsmathematik2\"
+    Exclude = "W:\W.WIMAT02.F1571*"
+},@{
+    Name = "Softwarekomponenten"
+    SourcePath = "J:\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\Softwarekomponenten\"
+    Exclude = "J:\W.WIINM21.F1571*","J:\EES\ESS-B1 JUnit_TDD_Testen_selbständig\Unterlagen\TotalBeginnersAll.zip","J:\Praxisprojekt\06. Mögliche Tools\easetupfull_20140916.exe",
+    "J:\EES\ESS-B3 Softwarearchitektur_Dokumentation\Video_42 für Architekten.mp4", "J:\EES\ESS-B3 Softwarearchitektur_Dokumentation\Video_Wo Softwarearchitekten lernen.mp4"
+},@{
+    Name = "English"
+    SourcePath = "H:\"
+    DestinationPath = "C:\OneDrive\Education\HSLU\Semester2\English\"
+    Exclude = ""
 }

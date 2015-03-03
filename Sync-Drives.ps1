@@ -1,8 +1,7 @@
 .\HSLUDriveConfig.ps1
-<#
 .\Dismount-Drives.ps1
 .\Mount-Drives.ps1
-#>
+
 $Syncs | ForEach-Object{
 
     Write-Host "`nRun sync for: $($_.Name)"
@@ -12,35 +11,28 @@ $Syncs | ForEach-Object{
     $Exclude = $_.Exclude
 
     # Get directories
-    $SourceDirectories = Get-ChildItem $SourcePath -Directory -Recurse | ForEach-Object{
-        $Directory = $_
-        if($Exclude){
-            $Exclude | ForEach-Object{
-                $Match = $_
-                $Directory | where{-not $_.FullName.contains($Match)}
+    $SourceDirectories = Get-ChildItem $SourcePath -Directory -Recurse -PipelineVariable Directory | ForEach-Object{ 
+            $ignore = $false
+            if($Exclude | Where {$Directory.FullName -like $_}){
+                $ignore = $true
             }
-        }else{
-            $Directory
-        }
-    } | select @{L="RelativePath";E={$_.FullName -replace [regex]::Escape($SourcePath),""}}
+            if(-not $ignore){$Directory}
+        } |
+        select @{L="RelativePath";E={$_.FullName -replace [regex]::Escape($SourcePath),""}}
 
-    $DestinationDirectories = Get-ChildItem $DestinationPath -Directory -Recurse | ForEach-Object{
-        $Directory = $_
-        if($Exclude){
-            $Exclude | ForEach-Object{
-                $Match = $_
-                $Directory | where{-not $_.FullName.contains($Match)}
+    $DestinationDirectories = Get-ChildItem $DestinationPath -Directory -Recurse -PipelineVariable Directory | ForEach-Object{ 
+            $ignore = $false
+            if($Exclude | Where {$Directory.FullName -like $_}){
+                $ignore = $true
             }
-        }else{
-            $Directory
-        }
-    } | select @{L="RelativePath";E={$_.FullName -replace [regex]::Escape($DestinationPath),""}}
+            if(-not $ignore){$Directory}
+        } |
+        select @{L="RelativePath";E={$_.FullName -replace [regex]::Escape($DestinationPath),""}}
 
     # create new directories
 
     $NewDirectories = @()
     if($SourceDirectories -eq $null){
-
 
     }elseif($DestinationDirectories -eq $null){
 
@@ -50,7 +42,7 @@ $Syncs | ForEach-Object{
     }else{
 
          Compare-Object $DestinationDirectories $SourceDirectories -Property "RelativePath" | where{$_.SideIndicator -eq "=>"} | ForEach-Object{
-
+    
             $NewDirectories += Join-Path $DestinationPath $_.RelativePath
         }
     }
@@ -61,22 +53,38 @@ $Syncs | ForEach-Object{
         New-Item -Type Directory -Path $_ -Confirm | Out-Null
     }
 
-    # sync files
+    # sync files for every directory
+
     $SyncDirectories = @()
     $SyncDirectories += $SourceDirectories | ForEach-Object{$_.RelativePath}
     $SyncDirectories += "\"
 
     $NewFiles = @()
     $SyncDirectories | where{$_ -ne $null} | ForEach-Object{
-
+        
         # get files
 
         $SourceDirectory = Join-Path $SourcePath $_
         $DestinationDirectory = Join-Path $DestinationPath $_
 
-        $SourceFiles = Get-ChildItem $SourceDirectory -File | select @{L="RelativeFilePath";E={$_.FullName -replace [regex]::Escape($SourcePath),""}},LastWriteTime
-        $DestinationFiles = Get-ChildItem $DestinationDirectory -File -ErrorAction Continue | select @{L="RelativeFilePath";E={$_.FullName -replace [regex]::Escape($DestinationPath),""}},LastWriteTime
-
+        $SourceFiles = Get-ChildItem $SourceDirectory -File -PipelineVariable File | ForEach-Object{ 
+                $ignore = $false
+                if($Exclude | Where {$File.FullName -like $_}){
+                    $ignore = $true
+                }
+                if(-not $ignore){$File}
+            } |
+            select @{L="RelativeFilePath";E={$_.FullName -replace [regex]::Escape($SourcePath),""}},LastWriteTime
+        
+        $DestinationFiles = Get-ChildItem $DestinationDirectory -File -ErrorAction Continue -PipelineVariable File | ForEach-Object{ 
+                $ignore = $false
+                if($Exclude | Where {$File.FullName -like $_}){
+                    $ignore = $true
+                }
+                if(-not $ignore){$File}
+            } |
+            select @{L="RelativeFilePath";E={$_.FullName -replace [regex]::Escape($DestinationPath),""}},LastWriteTime
+        
         # sync files
 
         if($SourceFiles -eq $null){
@@ -109,7 +117,7 @@ $Syncs | ForEach-Object{
 
                         # create new file path
                         $TempDestinationFilePath = Join-Path (Split-Path $DestinationFile -Parent) $($SourceFile.Name + "#" + $((Get-date $SourceFile.LastWriteTime -Format s) -replace ":","-") + $SourceFile.Extension)
-
+                    
                         # output copy job if destination file not already exists
                         if(-not (Test-Path $TempDestinationFilePath)){
 
@@ -117,9 +125,9 @@ $Syncs | ForEach-Object{
                                 Source = $SourceFile.FullName
                                 Destination = $TempDestinationFilePath
                             }
-                        }
+                        }                    
                     }else{
-
+                        
                         # do not copy as my files are newer
                     }
 
